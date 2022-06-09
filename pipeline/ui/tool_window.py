@@ -1,9 +1,12 @@
+import os.path
+
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit
-from Qt import QtCompat, QtCore
+from Qt import QtCompat, QtCore, QtWidgets
 import six
 import sys
 
-from pipeline.utils import dialogs
+from pipeline.utils import resolver
+
 
 if six.PY2:
     from pathlib2 import Path
@@ -18,6 +21,7 @@ except:
     in_maya = False
 
 ui_path = Path(__file__).parent /"qt"/ "browser_window.ui"
+UserRole = QtCore.Qt.UserRole
 
 
 class ToolWindow(QDialog):
@@ -26,50 +30,30 @@ class ToolWindow(QDialog):
         super(ToolWindow, self).__init__()
         QtCompat.loadUi(str(ui_path), self)
 
-        """self.build.clicked.connect(self.do_choose)
-        if in_maya :
-            self.buildOpen.clicked.connect(self.do_open)
-        else :
-            self.buildOpen.setEnabled(False)
-            #pass
-            #bouton grisée
-        self.choose.addItems(["Modeling", "Surfacing", "Rigging"])"""
+        self.open.clicked.connect(self.do_open)
+
+        self.fill_cats()
 
 
-    """def do_choose(self):
-        self.entry = self.findChild(QLineEdit, "entry")
-        nameAsset = self.entry.text()
-        print(nameAsset)
-        choose = str(self.choose.currentText())
+    def fill_cats(self):
+        for file in resolver.get_cats("MOVIE"):
+            fill_items(self.listCat, file, os.path.basename(file))
+
+
+    def do_open(self):
         result = None
-        if choose == "Modeling":
-            from pipeline.maya.tools.build import modeling_build as modeling
-            result = modeling.build(nameAsset)
-        elif choose == "Surfacing":
-            try:
-                from pipeline.maya.tools.build import surfacing_build as surfacing
-                result = surfacing.build(nameAsset)
-            except Exception as ex:
-                dialogs.Dialogs().warn(ex)
-        else:
-            try:
-                from pipeline.maya.tools.build import rigging_build as rigging
-                result = rigging.build(nameAsset)
-            except Exception as ex:
-                dialogs.Dialogs().warn(ex)
-        return result"""
-
-    """def do_open(self):
-        result = self.do_choose()
-        pm.openFile(result)"""
+        pm.openFile(result)
 
 
-def open():
-    app = QApplication(sys.argv)
-    t = ToolWindow()
-    t.show()
-    app.exec_()
+def fill_items(listWidget, label, data):
+    item = QtWidgets.QListWidgetItem()
+    item.setText(label)
+    item.setData(UserRole, data)  # facultatif, permet de récupérer les datas, mais pas obligatoire
+    listWidget.addItem(item)
+    return item
 
+
+#### Test ####
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

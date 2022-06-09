@@ -19,3 +19,4 @@ template_path = "D:/ABYGAELLE_FABRE/Pipeline_Git/pipeline/maya/templates/modelin
 
 grp_valid = ["front", "persp", "side", "top", "top_grp"]
 ####
+
